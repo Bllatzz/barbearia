@@ -1,22 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Body, H1 } from '../components/ui/Typography';
-import { Colors } from '../constants/Colors';
-import { databaseService } from '../services/DatabaseService';
-import { filaService } from '../services/FilaService';
-import { Cliente } from '../types';
+import React, { useEffect, useState } from "react";
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Body, H1 } from "../components/ui/Typography";
+import { Colors } from "../constants/Colors";
+import { databaseService } from "../services/DatabaseService";
+import { filaService } from "../services/FilaService";
+import { Cliente } from "../types";
 
-type Barbeiro = 'diego' | 'guilherme' | 'qualquer';
+type Barbeiro = "diego" | "guilherme" | "qualquer";
 
 export default function PainelScreen() {
   const [isAdmin, setIsAdmin] = useState(false);
-  const [usuario, setUsuario] = useState('');
-  const [senha, setSenha] = useState('');
+  const [usuario, setUsuario] = useState("");
+  const [senha, setSenha] = useState("");
   const [barbeiroLogado, setBarbeiroLogado] = useState<Barbeiro | null>(null);
-  const [nomeBarbeiro, setNomeBarbeiro] = useState('');
-  const [nomeManual, setNomeManual] = useState('');
-  const [whatsappManual, setWhatsappManual] = useState('');
-  const [barbeiroManual, setBarbeiroManual] = useState<Barbeiro>('qualquer');
+  const [nomeBarbeiro, setNomeBarbeiro] = useState("");
+  const [nomeManual, setNomeManual] = useState("");
+  const [whatsappManual, setWhatsappManual] = useState("");
+  const [barbeiroManual, setBarbeiroManual] = useState<Barbeiro>("qualquer");
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState(false);
   const [monitoramentoAtivo, setMonitoramentoAtivo] = useState(false);
@@ -24,8 +32,8 @@ export default function PainelScreen() {
   const [atendidosSemana, setAtendidosSemana] = useState(0);
   const [atendidosMes, setAtendidosMes] = useState(0);
   const [precisaTrocarSenha, setPrecisaTrocarSenha] = useState(false);
-  const [novaSenha, setNovaSenha] = useState('');
-  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState('');
+  const [novaSenha, setNovaSenha] = useState("");
+  const [confirmarNovaSenha, setConfirmarNovaSenha] = useState("");
 
   // Atualização em tempo real da fila
   useEffect(() => {
@@ -40,15 +48,15 @@ export default function PainelScreen() {
   useEffect(() => {
     carregarClientes();
     const unsubscribe = filaService.onFilaChange(carregarClientes);
-    
+
     // Verificar status do monitoramento
     const verificarMonitoramento = () => {
       setMonitoramentoAtivo(filaService.isMonitoramentoAtivo());
     };
-    
+
     verificarMonitoramento();
     const interval = setInterval(verificarMonitoramento, 5000);
-    
+
     return () => {
       unsubscribe();
       clearInterval(interval);
@@ -59,65 +67,71 @@ export default function PainelScreen() {
     try {
       const todosClientes = await databaseService.getClientes();
       setClientes(todosClientes);
-      
+
       // Carregar estatísticas de atendidos
       const hoje = await databaseService.getAtendidosPorDia();
       const semana = await databaseService.getAtendidosSemana();
       const mes = await databaseService.getAtendidosMes();
-      
+
       setAtendidosHoje(hoje);
       setAtendidosSemana(semana);
       setAtendidosMes(mes);
     } catch (error) {
-      console.error('Erro ao carregar clientes:', error);
+      console.error("Erro ao carregar clientes:", error);
     }
   };
 
   function isSenhaPadrao(usuario: string, senha: string) {
     return (
-      (usuario === 'diego' && senha === 'diego123') ||
-      (usuario === 'guilherme' && senha === 'guilherme123') ||
-      (usuario === 'admin' && senha === 'admin123')
+      (usuario === "diego" && senha === "diego123") ||
+      (usuario === "guilherme" && senha === "guilherme123") ||
+      (usuario === "admin" && senha === "admin123")
     );
   }
 
   async function handleLogin() {
     if (!usuario.trim() || !senha.trim()) {
-      Alert.alert('Preencha usuário e senha');
+      Alert.alert("Preencha usuário e senha");
       return;
     }
 
     setLoading(true);
     try {
-      const resultado = await databaseService.verificarLogin(usuario.trim(), senha);
-      
+      const resultado = await databaseService.verificarLogin(
+        usuario.trim(),
+        senha
+      );
+
       if (resultado.sucesso && resultado.barbeiro) {
         if (isSenhaPadrao(usuario.trim(), senha)) {
           setPrecisaTrocarSenha(true);
           setIsAdmin(false);
           setBarbeiroLogado(null);
-          setNomeBarbeiro(resultado.nome || '');
-          setNovaSenha('');
-          setConfirmarNovaSenha('');
-          Alert.alert('Troque sua senha', 'Por segurança, altere sua senha padrão.');
+          setNomeBarbeiro(resultado.nome || "");
+          setNovaSenha("");
+          setConfirmarNovaSenha("");
+          Alert.alert(
+            "Troque sua senha",
+            "Por segurança, altere sua senha padrão."
+          );
           return;
         }
 
         setIsAdmin(true);
         setBarbeiroLogado(resultado.barbeiro as Barbeiro);
-        setNomeBarbeiro(resultado.nome || '');
-        
+        setNomeBarbeiro(resultado.nome || "");
+
         const filaAtual = await filaService.getFilaAtual();
         setClientes(filaAtual);
-        
+
         // Limpar campos
-        setUsuario('');
-        setSenha('');
+        setUsuario("");
+        setSenha("");
       } else {
-        Alert.alert('Erro', 'Usuário ou senha incorretos');
+        Alert.alert("Erro", "Usuário ou senha incorretos");
       }
     } catch (e) {
-      Alert.alert('Erro', 'Não foi possível fazer login');
+      Alert.alert("Erro", "Não foi possível fazer login");
     } finally {
       setLoading(false);
     }
@@ -125,37 +139,44 @@ export default function PainelScreen() {
 
   async function handleTrocarSenha() {
     if (!novaSenha || novaSenha.length < 6) {
-      Alert.alert('A senha deve ter pelo menos 6 caracteres');
+      Alert.alert("A senha deve ter pelo menos 6 caracteres");
       return;
     }
     if (novaSenha !== confirmarNovaSenha) {
-      Alert.alert('As senhas não coincidem');
+      Alert.alert("As senhas não coincidem");
       return;
     }
     setLoading(true);
     try {
-      const sucesso = await databaseService.alterarSenha(usuario.trim(), senha, novaSenha);
+      const sucesso = await databaseService.alterarSenha(
+        usuario.trim(),
+        senha,
+        novaSenha
+      );
       if (sucesso) {
-        Alert.alert('Senha alterada com sucesso!');
+        Alert.alert("Senha alterada com sucesso!");
         setPrecisaTrocarSenha(false);
-        
+
         // Fazer login automaticamente com a nova senha
-        const resultado = await databaseService.verificarLogin(usuario.trim(), novaSenha);
+        const resultado = await databaseService.verificarLogin(
+          usuario.trim(),
+          novaSenha
+        );
         if (resultado.sucesso && resultado.barbeiro) {
           setIsAdmin(true);
           setBarbeiroLogado(resultado.barbeiro as Barbeiro);
-          setNomeBarbeiro(resultado.nome || '');
-          
+          setNomeBarbeiro(resultado.nome || "");
+
           const filaAtual = await filaService.getFilaAtual();
           setClientes(filaAtual);
-          
-          setUsuario('');
-          setSenha('');
-          setNovaSenha('');
-          setConfirmarNovaSenha('');
+
+          setUsuario("");
+          setSenha("");
+          setNovaSenha("");
+          setConfirmarNovaSenha("");
         }
       } else {
-        Alert.alert('Erro ao alterar senha');
+        Alert.alert("Erro ao alterar senha");
       }
     } finally {
       setLoading(false);
@@ -163,50 +184,50 @@ export default function PainelScreen() {
   }
 
   async function handleRemover(cliente: Cliente) {
-    Alert.alert(
-      'Remover cliente',
-      `Deseja remover ${cliente.nome} da fila?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Atendido',
-          onPress: async () => {
-            try {
-              await filaService.removerCliente(cliente.id, 'atendido');
-            } catch (e) {
-              console.error('Erro ao remover cliente como atendido:', e);
-              Alert.alert('Erro', 'Não foi possível remover o cliente');
-            }
+    Alert.alert("Remover cliente", `Deseja remover ${cliente.nome} da fila?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Atendido",
+        onPress: async () => {
+          try {
+            await filaService.removerCliente(cliente.id, "atendido");
+          } catch (e) {
+            console.error("Erro ao remover cliente como atendido:", e);
+            Alert.alert("Erro", "Não foi possível remover o cliente");
           }
         },
-        {
-          text: 'Ausente',
-          onPress: async () => {
-            try {
-              await filaService.removerCliente(cliente.id, 'ausente');
-            } catch (e) {
-              console.error('Erro ao remover cliente como ausente:', e);
-              Alert.alert('Erro', 'Não foi possível remover o cliente');
-            }
+      },
+      {
+        text: "Ausente",
+        onPress: async () => {
+          try {
+            await filaService.removerCliente(cliente.id, "ausente");
+          } catch (e) {
+            console.error("Erro ao remover cliente como ausente:", e);
+            Alert.alert("Erro", "Não foi possível remover o cliente");
           }
-        }
-      ]
-    );
+        },
+      },
+    ]);
   }
 
   async function handleAdicionarManual() {
     if (!nomeManual.trim()) {
-      Alert.alert('Preencha o nome');
+      Alert.alert("Preencha o nome");
       return;
     }
     setLoading(true);
     try {
-      await filaService.adicionarClienteManual(nomeManual.trim(), whatsappManual.trim() || undefined, barbeiroManual);
-      setNomeManual('');
-      setWhatsappManual('');
-      setBarbeiroManual('qualquer');
+      await filaService.adicionarClienteManual(
+        nomeManual.trim(),
+        whatsappManual.trim() || undefined,
+        barbeiroManual
+      );
+      setNomeManual("");
+      setWhatsappManual("");
+      setBarbeiroManual("qualquer");
     } catch (e) {
-      Alert.alert('Erro', 'Não foi possível adicionar o cliente');
+      Alert.alert("Erro", "Não foi possível adicionar o cliente");
     } finally {
       setLoading(false);
     }
@@ -215,15 +236,15 @@ export default function PainelScreen() {
   async function removerPrimeiro() {
     const aguardando = getClientesAguardandoBarbeiro();
     if (aguardando.length === 0) {
-      Alert.alert('Aviso', 'Não há clientes aguardando');
+      Alert.alert("Aviso", "Não há clientes aguardando");
       return;
     }
 
     try {
       await databaseService.removerCliente(aguardando[0].id);
-      Alert.alert('Sucesso', `${aguardando[0].nome} removido da fila`);
+      Alert.alert("Sucesso", `${aguardando[0].nome} removido da fila`);
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao remover primeiro cliente');
+      Alert.alert("Erro", "Falha ao remover primeiro cliente");
     }
   }
 
@@ -233,14 +254,14 @@ export default function PainelScreen() {
       const hoje = await databaseService.getAtendidosPorDia();
       const semana = await databaseService.getAtendidosSemana();
       const mes = await databaseService.getAtendidosMes();
-      
+
       setAtendidosHoje(hoje);
       setAtendidosSemana(semana);
       setAtendidosMes(mes);
-      
-      Alert.alert('Sucesso', 'Estatísticas atualizadas!');
+
+      Alert.alert("Sucesso", "Estatísticas atualizadas!");
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao atualizar estatísticas');
+      Alert.alert("Erro", "Falha ao atualizar estatísticas");
     } finally {
       setLoading(false);
     }
@@ -251,9 +272,9 @@ export default function PainelScreen() {
     try {
       await databaseService.corrigirPosicoesFila();
       await carregarClientes(); // Recarregar para mostrar as correções
-      Alert.alert('Sucesso', 'Posições da fila corrigidas!');
+      Alert.alert("Sucesso", "Posições da fila corrigidas!");
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao corrigir posições');
+      Alert.alert("Erro", "Falha ao corrigir posições");
     } finally {
       setLoading(false);
     }
@@ -261,26 +282,28 @@ export default function PainelScreen() {
 
   // Filtrar clientes por barbeiro logado
   const getClientesBarbeiro = () => {
-    if (!barbeiroLogado || barbeiroLogado === 'qualquer') {
+    if (!barbeiroLogado || barbeiroLogado === "qualquer") {
       return clientes;
     }
-    return clientes.filter(c => c.barbeiro === barbeiroLogado || c.barbeiro === 'qualquer');
+    return clientes.filter(
+      (c) => c.barbeiro === barbeiroLogado || c.barbeiro === "qualquer"
+    );
   };
 
   const getClientesAguardandoBarbeiro = () => {
-    return getClientesBarbeiro().filter(c => c.status === 'aguardando');
+    return getClientesBarbeiro().filter((c) => c.status === "aguardando");
   };
 
   const getClientesChamadosBarbeiro = () => {
-    return getClientesBarbeiro().filter(c => c.status === 'chamado');
+    return getClientesBarbeiro().filter((c) => c.status === "chamado");
   };
 
   const getClientesAtendidosBarbeiro = () => {
-    return getClientesBarbeiro().filter(c => c.status === 'atendido');
+    return getClientesBarbeiro().filter((c) => c.status === "atendido");
   };
 
   const getClientesAusentesBarbeiro = () => {
-    return getClientesBarbeiro().filter(c => c.status === 'ausente');
+    return getClientesBarbeiro().filter((c) => c.status === "ausente");
   };
 
   const clientesAguardando = getClientesAguardandoBarbeiro();
@@ -289,47 +312,92 @@ export default function PainelScreen() {
   const clientesAusentes = getClientesAusentesBarbeiro();
 
   // Verificar disponibilidade dos barbeiros
-  const clientesChamadosDiego = clientes.filter(c => c.status === 'chamado' && (c.barbeiro === 'diego' || c.barbeiro === 'qualquer'));
-  const clientesChamadosGuilherme = clientes.filter(c => c.status === 'chamado' && (c.barbeiro === 'guilherme' || c.barbeiro === 'qualquer'));
-  
-  const diegoDisponivel = clientesChamadosDiego.length === 0 && clientes.filter(c => c.status === 'chamado').length < 2;
-  const guilhermeDisponivel = clientesChamadosGuilherme.length === 0 && clientes.filter(c => c.status === 'chamado').length < 2;
+  const clientesChamadosDiego = clientes.filter(
+    (c) =>
+      c.status === "chamado" &&
+      (c.barbeiro === "diego" || c.barbeiro === "qualquer")
+  );
+  const clientesChamadosGuilherme = clientes.filter(
+    (c) =>
+      c.status === "chamado" &&
+      (c.barbeiro === "guilherme" || c.barbeiro === "qualquer")
+  );
+
+  const diegoDisponivel =
+    clientesChamadosDiego.length === 0 &&
+    clientes.filter((c) => c.status === "chamado").length < 2;
+  const guilhermeDisponivel =
+    clientesChamadosGuilherme.length === 0 &&
+    clientes.filter((c) => c.status === "chamado").length < 2;
 
   const getBarbeiroLabel = (barbeiro: string) => {
     switch (barbeiro) {
-      case 'diego': return 'Diego';
-      case 'guilherme': return 'Guilherme';
-      case 'qualquer': return 'Qualquer';
-      default: return barbeiro;
+      case "diego":
+        return "Diego";
+      case "guilherme":
+        return "Guilherme";
+      case "qualquer":
+        return "Qualquer";
+      default:
+        return barbeiro;
     }
   };
 
   if (precisaTrocarSenha) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 24 }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+        }}
+      >
         <H1>Trocar Senha</H1>
-        <Text style={{ marginTop: 16 }}>Por segurança, altere sua senha padrão:</Text>
+        <Text style={{ marginTop: 16 }}>
+          Por segurança, altere sua senha padrão:
+        </Text>
         <TextInput
           placeholder="Nova senha"
           secureTextEntry
           value={novaSenha}
           onChangeText={setNovaSenha}
-          style={{ marginTop: 24, borderWidth: 1, borderRadius: 8, padding: 12, width: '100%' }}
+          style={{
+            marginTop: 24,
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            width: "100%",
+          }}
         />
         <TextInput
           placeholder="Confirmar nova senha"
           secureTextEntry
           value={confirmarNovaSenha}
           onChangeText={setConfirmarNovaSenha}
-          style={{ marginTop: 12, borderWidth: 1, borderRadius: 8, padding: 12, width: '100%' }}
+          style={{
+            marginTop: 12,
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 12,
+            width: "100%",
+          }}
         />
         <TouchableOpacity
-          style={{ marginTop: 24, backgroundColor: Colors.primary, padding: 16, borderRadius: 8, width: '100%' }}
+          style={{
+            marginTop: 24,
+            backgroundColor: Colors.primary,
+            padding: 16,
+            borderRadius: 8,
+            width: "100%",
+          }}
           onPress={handleTrocarSenha}
           disabled={loading}
         >
-          <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>
-            {loading ? 'Salvando...' : 'Salvar nova senha'}
+          <Text
+            style={{ color: "#fff", textAlign: "center", fontWeight: "bold" }}
+          >
+            {loading ? "Salvando..." : "Salvar nova senha"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -342,7 +410,11 @@ export default function PainelScreen() {
         <H1 color={Colors.primary} align="center" style={styles.title}>
           Login - Painel do Barbeiro
         </H1>
-        <Body color={Colors.textSecondary} align="center" style={styles.subtitle}>
+        <Body
+          color={Colors.textSecondary}
+          align="center"
+          style={styles.subtitle}
+        >
           Acesso restrito. Digite seu usuário e senha:
         </Body>
 
@@ -354,7 +426,7 @@ export default function PainelScreen() {
           onChangeText={setUsuario}
           autoCapitalize="none"
         />
-        
+
         <TextInput
           style={styles.input}
           placeholder="Senha"
@@ -363,24 +435,23 @@ export default function PainelScreen() {
           onChangeText={setSenha}
           secureTextEntry
         />
-        
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
-          onPress={handleLogin} 
+
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
+          onPress={handleLogin}
           disabled={loading}
           activeOpacity={0.85}
         >
           <Text style={styles.buttonText}>
-            {loading ? 'Entrando...' : 'Entrar'}
+            {loading ? "Entrando..." : "Entrar"}
           </Text>
         </TouchableOpacity>
 
         <View style={styles.loginInfo}>
           <Text style={styles.loginInfoText}>
-            <Text style={styles.bold}>Usuários padrão:</Text>{'\n'}
-            • Diego: diego / diego123{'\n'}
-            • Guilherme: guilherme / guilherme123{'\n'}
-            • Admin: admin / admin123
+            <Text style={styles.bold}>Usuários padrão:</Text>
+            {"\n"}• Diego: diego / diego123{"\n"}• Guilherme: guilherme /
+            guilherme123{"\n"}• Admin: admin / admin123
           </Text>
         </View>
       </View>
@@ -389,33 +460,43 @@ export default function PainelScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.headerContainer}>
           <H1 color={Colors.primary} align="center" style={styles.title}>
             Painel do {nomeBarbeiro || getBarbeiroLabel(barbeiroLogado!)}
           </H1>
-          <TouchableOpacity 
-            style={styles.logoutButton} 
+          <TouchableOpacity
+            style={styles.logoutButton}
             onPress={() => {
               setIsAdmin(false);
               setBarbeiroLogado(null);
-              setNomeBarbeiro('');
+              setNomeBarbeiro("");
             }}
           >
             <Text style={styles.logoutButtonText}>Sair</Text>
           </TouchableOpacity>
         </View>
-        
+
         {/* Status do Monitoramento Automático */}
         <View style={styles.statusCard}>
           <View style={styles.statusRow}>
-            <View style={[styles.statusIndicator, { backgroundColor: monitoramentoAtivo ? '#4CAF50' : '#F44336' }]} />
+            <View
+              style={[
+                styles.statusIndicator,
+                { backgroundColor: monitoramentoAtivo ? "#4CAF50" : "#F44336" },
+              ]}
+            />
             <Text style={styles.statusText}>
-              Monitoramento Automático: {monitoramentoAtivo ? 'ATIVO' : 'INATIVO'}
+              Monitoramento Automático:{" "}
+              {monitoramentoAtivo ? "ATIVO" : "INATIVO"}
             </Text>
           </View>
           <Text style={styles.statusDescription}>
-            O sistema chama automaticamente o próximo cliente quando há vagas disponíveis
+            O sistema chama automaticamente o próximo cliente quando há vagas
+            disponíveis
           </Text>
         </View>
 
@@ -437,7 +518,9 @@ export default function PainelScreen() {
 
         {/* Estatísticas de Atendidos */}
         <View style={styles.section}>
-          <Body color={Colors.primary} style={styles.sectionTitle}>ESTATÍSTICAS DE ATENDIDOS</Body>
+          <Body color={Colors.primary} style={styles.sectionTitle}>
+            ESTATÍSTICAS DE ATENDIDOS
+          </Body>
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{atendidosHoje}</Text>
@@ -456,18 +539,40 @@ export default function PainelScreen() {
 
         {/* Status dos Barbeiros */}
         <View style={styles.section}>
-          <Body color={Colors.primary} style={styles.sectionTitle}>STATUS DOS BARBEIROS</Body>
+          <Body color={Colors.primary} style={styles.sectionTitle}>
+            STATUS DOS BARBEIROS
+          </Body>
           <View style={styles.barbeiroStatus}>
-            <View style={[styles.statusCard, { backgroundColor: diegoDisponivel ? '#d4edda' : '#f8d7da' }]}>
+            <View
+              style={[
+                styles.statusCard,
+                { backgroundColor: diegoDisponivel ? "#d4edda" : "#f8d7da" },
+              ]}
+            >
               <Text style={styles.statusTitle}>Diego</Text>
               <Text style={styles.statusText}>
-                {diegoDisponivel ? 'Disponível' : clientesChamadosDiego.length > 0 ? 'Ocupado' : 'Vagas lotadas'}
+                {diegoDisponivel
+                  ? "Disponível"
+                  : clientesChamadosDiego.length > 0
+                  ? "Ocupado"
+                  : "Vagas lotadas"}
               </Text>
             </View>
-            <View style={[styles.statusCard, { backgroundColor: guilhermeDisponivel ? '#d4edda' : '#f8d7da' }]}>
+            <View
+              style={[
+                styles.statusCard,
+                {
+                  backgroundColor: guilhermeDisponivel ? "#d4edda" : "#f8d7da",
+                },
+              ]}
+            >
               <Text style={styles.statusTitle}>Guilherme</Text>
               <Text style={styles.statusText}>
-                {guilhermeDisponivel ? 'Disponível' : clientesChamadosGuilherme.length > 0 ? 'Ocupado' : 'Vagas lotadas'}
+                {guilhermeDisponivel
+                  ? "Disponível"
+                  : clientesChamadosGuilherme.length > 0
+                  ? "Ocupado"
+                  : "Vagas lotadas"}
               </Text>
             </View>
           </View>
@@ -475,23 +580,23 @@ export default function PainelScreen() {
 
         {/* Botões de Ação */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: '#dc3545' }]} 
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#dc3545" }]}
             onPress={removerPrimeiro}
           >
             <Text style={styles.actionButtonText}>Remover Primeiro</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: '#17a2b8' }]} 
+
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#17a2b8" }]}
             onPress={atualizarEstatisticas}
             disabled={loading}
           >
             <Text style={styles.actionButtonText}>Atualizar Estatísticas</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={[styles.actionButton, { backgroundColor: '#ffc107' }]} 
+
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#ffc107" }]}
             onPress={corrigirPosicoes}
             disabled={loading}
           >
@@ -502,28 +607,46 @@ export default function PainelScreen() {
         {/* Clientes Chamados */}
         {clientesChamados.length > 0 && (
           <View style={styles.section}>
-            <Body color={Colors.primary} style={styles.sectionTitle}>CHAMADOS ({clientesChamados.length})</Body>
+            <Body color={Colors.primary} style={styles.sectionTitle}>
+              CHAMADOS ({clientesChamados.length})
+            </Body>
             {clientesChamados.map((cliente) => (
               <View key={cliente.id} style={styles.cardChamado}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.nomeChamado}>{cliente.nome}</Text>
                   <View style={styles.cardActions}>
-                    <TouchableOpacity 
-                      style={[styles.actionButton, { backgroundColor: '#28a745' }]} 
-                      onPress={() => filaService.removerCliente(cliente.id, 'atendido')}
+                    <TouchableOpacity
+                      style={[
+                        styles.actionButton,
+                        { backgroundColor: "#28a745" },
+                      ]}
+                      onPress={() =>
+                        filaService.removerCliente(cliente.id, "atendido")
+                      }
                     >
                       <Text style={styles.actionButtonText}>✓</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                      style={[styles.actionButton, { backgroundColor: '#dc3545' }]} 
-                      onPress={() => filaService.removerCliente(cliente.id, 'ausente')}
+                    <TouchableOpacity
+                      style={[
+                        styles.actionButton,
+                        { backgroundColor: "#dc3545" },
+                      ]}
+                      onPress={() =>
+                        filaService.removerCliente(cliente.id, "ausente")
+                      }
                     >
                       <Text style={styles.actionButtonText}>✕</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
-                {cliente.telefone && <Text style={styles.whatsapp}>📱 {cliente.telefone}</Text>}
-                {cliente.barbeiro && <Text style={styles.barbeiro}>💇 {getBarbeiroLabel(cliente.barbeiro)}</Text>}
+                {cliente.telefone && (
+                  <Text style={styles.whatsapp}>📱 {cliente.telefone}</Text>
+                )}
+                {cliente.barbeiro && (
+                  <Text style={styles.barbeiro}>
+                    💇 {getBarbeiroLabel(cliente.barbeiro)}
+                  </Text>
+                )}
               </View>
             ))}
           </View>
@@ -531,31 +654,48 @@ export default function PainelScreen() {
 
         {/* Lista de Espera */}
         <View style={styles.section}>
-          <Body color={Colors.primary} style={styles.sectionTitle}>AGUARDANDO ({clientesAguardando.length})</Body>
+          <Body color={Colors.primary} style={styles.sectionTitle}>
+            AGUARDANDO ({clientesAguardando.length})
+          </Body>
           {clientesAguardando.length === 0 ? (
             <Text style={styles.vazio}>Nenhum cliente aguardando</Text>
           ) : (
             clientesAguardando.map((cliente, index) => (
               <View key={cliente.id} style={styles.cardAguardando}>
                 <View style={styles.cardHeader}>
-                  <Text style={styles.nomeAguardando}>{index + 1}º - {cliente.nome}</Text>
-                  <TouchableOpacity 
-                    style={styles.removerBtn} 
+                  <Text style={styles.nomeAguardando}>
+                    {index + 1}º - {cliente.nome}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.removerBtn}
                     onPress={() => handleRemover(cliente)}
                   >
                     <Text style={styles.removerBtnText}>Remover</Text>
                   </TouchableOpacity>
                 </View>
-                {cliente.telefone && <Text style={styles.whatsapp}>📱 {cliente.telefone}</Text>}
-                {cliente.barbeiro && <Text style={styles.barbeiro}>💇 {getBarbeiroLabel(cliente.barbeiro)}</Text>}
+                {cliente.telefone && (
+                  <Text style={styles.whatsapp}>📱 {cliente.telefone}</Text>
+                )}
+                {cliente.barbeiro && (
+                  <Text style={styles.barbeiro}>
+                    💇 {getBarbeiroLabel(cliente.barbeiro)}
+                  </Text>
+                )}
               </View>
             ))
           )}
         </View>
 
         {/* Formulário para Adicionar Manualmente */}
-        <View style={[styles.section, { display: 'flex', justifyContent: 'center', alignItems: 'center' }]}>
-          <Body color={Colors.primary} style={styles.sectionTitle}>ADICIONAR CLIENTE</Body>
+        <View
+          style={[
+            styles.section,
+            { display: "flex", justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Body color={Colors.primary} style={styles.sectionTitle}>
+            ADICIONAR CLIENTE
+          </Body>
           <View style={styles.formContainer}>
             <TextInput
               style={styles.input}
@@ -572,56 +712,73 @@ export default function PainelScreen() {
               onChangeText={setWhatsappManual}
               keyboardType="phone-pad"
             />
-            
+
             <View style={styles.barbeiroSelector}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[
-                  styles.barbeiroOption, 
-                  barbeiroManual === 'diego' && styles.barbeiroOptionSelected
-                ]} 
-                onPress={() => setBarbeiroManual('diego')}
+                  styles.barbeiroOption,
+                  barbeiroManual === "diego" && styles.barbeiroOptionSelected,
+                ]}
+                onPress={() => setBarbeiroManual("diego")}
               >
-                <Text style={[
-                  styles.barbeiroOptionText,
-                  barbeiroManual === 'diego' && styles.barbeiroOptionTextSelected
-                ]}>Diego</Text>
+                <Text
+                  style={[
+                    styles.barbeiroOptionText,
+                    barbeiroManual === "diego" &&
+                      styles.barbeiroOptionTextSelected,
+                  ]}
+                >
+                  Diego
+                </Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[
-                  styles.barbeiroOption, 
-                  barbeiroManual === 'guilherme' && styles.barbeiroOptionSelected
-                ]} 
-                onPress={() => setBarbeiroManual('guilherme')}
+                  styles.barbeiroOption,
+                  barbeiroManual === "guilherme" &&
+                    styles.barbeiroOptionSelected,
+                ]}
+                onPress={() => setBarbeiroManual("guilherme")}
               >
-                <Text style={[
-                  styles.barbeiroOptionText,
-                  barbeiroManual === 'guilherme' && styles.barbeiroOptionTextSelected
-                ]}>Guilherme</Text>
+                <Text
+                  style={[
+                    styles.barbeiroOptionText,
+                    barbeiroManual === "guilherme" &&
+                      styles.barbeiroOptionTextSelected,
+                  ]}
+                >
+                  Guilherme
+                </Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 style={[
-                  styles.barbeiroOption, 
-                  barbeiroManual === 'qualquer' && styles.barbeiroOptionSelected
-                ]} 
-                onPress={() => setBarbeiroManual('qualquer')}
+                  styles.barbeiroOption,
+                  barbeiroManual === "qualquer" &&
+                    styles.barbeiroOptionSelected,
+                ]}
+                onPress={() => setBarbeiroManual("qualquer")}
               >
-                <Text style={[
-                  styles.barbeiroOptionText,
-                  barbeiroManual === 'qualquer' && styles.barbeiroOptionTextSelected
-                ]}>Qualquer</Text>
+                <Text
+                  style={[
+                    styles.barbeiroOptionText,
+                    barbeiroManual === "qualquer" &&
+                      styles.barbeiroOptionTextSelected,
+                  ]}
+                >
+                  Qualquer
+                </Text>
               </TouchableOpacity>
             </View>
-            
-            <TouchableOpacity 
-              style={[styles.button, loading && styles.buttonDisabled]} 
+
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
               onPress={handleAdicionarManual}
               disabled={loading}
               activeOpacity={0.85}
             >
               <Text style={styles.buttonText}>
-                {loading ? 'Adicionando...' : 'Adicionar Cliente'}
+                {loading ? "Adicionando..." : "Adicionar Cliente"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -653,7 +810,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textPrimary,
     marginBottom: 16,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -664,7 +821,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
@@ -672,10 +829,10 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'Montserrat',
+    fontWeight: "bold",
+    fontFamily: "Brewheat",
   },
   buttonDisabled: {
     backgroundColor: Colors.surfaceHover,
@@ -692,8 +849,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 8,
   },
   statusIndicator: {
@@ -704,18 +861,18 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   statusDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   statsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     marginBottom: 16,
   },
@@ -724,7 +881,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderRadius: 12,
     padding: 16,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 4,
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
@@ -734,15 +891,15 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.primary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   statLabel: {
     fontSize: 12,
     color: Colors.textSecondary,
     marginTop: 4,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   section: {
     padding: 16,
@@ -750,34 +907,34 @@ const styles = StyleSheet.create({
   sectionTitle: {
     marginBottom: 16,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   barbeiroStatus: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statusTitle: {
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     marginBottom: 16,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   actionButton: {
     flex: 1,
     backgroundColor: Colors.primary,
     borderRadius: 12,
     padding: 12,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 2,
     marginBottom: 8,
-    minWidth: '22%',
+    minWidth: "22%",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -785,10 +942,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   actionButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: 'Montserrat',
+    fontWeight: "bold",
+    fontFamily: "Montserrat",
   },
   cardChamado: {
     backgroundColor: Colors.surface,
@@ -802,18 +959,18 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   nomeChamado: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: 'Montserrat',
-    fontWeight: 'bold',
+    fontFamily: "Montserrat",
+    fontWeight: "bold",
   },
   cardActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   cardAguardando: {
@@ -830,23 +987,23 @@ const styles = StyleSheet.create({
   nomeAguardando: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: 'Montserrat',
-    fontWeight: 'bold',
+    fontFamily: "Montserrat",
+    fontWeight: "bold",
   },
   whatsapp: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
     marginBottom: 6,
   },
   barbeiro: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
     marginBottom: 6,
   },
   removerBtn: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginTop: 4,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -854,21 +1011,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.error,
   },
   removerBtnText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 14,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   vazio: {
     fontSize: 16,
     color: Colors.textMuted,
-    textAlign: 'center',
-    fontFamily: 'Montserrat',
-    fontStyle: 'italic',
+    textAlign: "center",
+    fontFamily: "Montserrat",
+    fontStyle: "italic",
     padding: 20,
   },
   formContainer: {
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
     marginTop: 24,
     backgroundColor: Colors.surface,
@@ -881,8 +1038,8 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   barbeiroSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 24,
   },
   barbeiroOption: {
@@ -896,11 +1053,11 @@ const styles = StyleSheet.create({
   barbeiroOptionText: {
     color: Colors.textPrimary,
     fontSize: 14,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
   barbeiroOptionTextSelected: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   loginInfo: {
     marginTop: 24,
@@ -912,17 +1069,17 @@ const styles = StyleSheet.create({
   loginInfoText: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
     lineHeight: 20,
   },
   bold: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.textPrimary,
   },
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 16,
     marginTop: 60,
     marginBottom: 8,
@@ -934,9 +1091,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   logoutButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: 'bold',
-    fontFamily: 'Montserrat',
+    fontWeight: "bold",
+    fontFamily: "Montserrat",
   },
-}); 
+});

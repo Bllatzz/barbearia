@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import React from 'react';
+import { router } from "expo-router";
+import React from "react";
 import {
   Image,
   StatusBar,
@@ -7,9 +7,9 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { H1 } from '../components/ui/Typography';
-import { Colors } from '../constants/Colors';
+} from "react-native";
+import { H1 } from "../components/ui/Typography";
+import { Colors } from "../constants/Colors";
 
 export default function HomeScreen() {
   return (
@@ -17,7 +17,7 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
       <View style={styles.logoBox}>
         <Image
-          source={require('../assets/images/logo.png')}
+          source={require("../assets/images/logo.png")}
           style={styles.logoImg}
           resizeMode="contain"
         />
@@ -28,14 +28,14 @@ export default function HomeScreen() {
       <TouchableOpacity
         style={styles.button}
         activeOpacity={0.85}
-        onPress={() => router.push('/fila')}
+        onPress={() => router.push("/fila")}
       >
         <Text style={styles.buttonText}>Entrar na Fila</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
         activeOpacity={0.85}
-        onPress={() => router.push('/painel')}
+        onPress={() => router.push("/painel")}
       >
         <Text style={styles.buttonText}>Acessar Painel</Text>
       </TouchableOpacity>
@@ -47,8 +47,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 32,
   },
   logoBox: {
@@ -56,8 +56,8 @@ const styles = StyleSheet.create({
     height: 160,
     borderRadius: 80,
     backgroundColor: Colors.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 32,
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 4 },
@@ -66,15 +66,15 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   logoImg: {
-    width: '90%',
-    height: '90%',
+    width: "90%",
+    height: "90%",
   },
   title: {
     fontSize: 40,
     marginBottom: 48,
-    fontFamily: 'Lobster',
+    fontFamily: "Lobster",
     color: Colors.primary,
-    textAlign: 'center',
+    textAlign: "center",
     letterSpacing: 1,
   },
   button: {
@@ -88,15 +88,15 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 6,
     marginTop: 8,
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     letterSpacing: 1,
-    fontFamily: 'Montserrat',
+    fontFamily: "Montserrat",
   },
-}); 
+});
