@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
-import { Colors } from '../../constants/Colors';
-import { Body, Caption } from './Typography';
+import React, { useState } from "react";
+import { StyleSheet, TextInput, TextInputProps, View } from "react-native";
+import { Colors } from "../../constants/Colors";
+import { Body, Caption } from "./Typography";
 
 interface InputProps extends TextInputProps {
   label?: string;
@@ -27,18 +27,16 @@ export default function Input({
           {label}
         </Body>
       )}
-      <View style={[
-        styles.inputContainer,
-        isFocused && styles.inputFocused,
-        error && styles.inputError,
-      ]}>
+      <View
+        style={[
+          styles.inputContainer,
+          isFocused && styles.inputFocused,
+          error && styles.inputError,
+        ]}
+      >
         {icon && <View style={styles.iconContainer}>{icon}</View>}
         <TextInput
-          style={[
-            styles.input,
-            icon ? styles.inputWithIcon : null,
-            style,
-          ]}
+          style={[styles.input, icon ? styles.inputWithIcon : null, style]}
           placeholderTextColor={Colors.textMuted}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -66,8 +64,8 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.textMuted,
     borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     shadowColor: Colors.shadowLight,
     shadowOffset: {
       width: 0,
@@ -95,7 +93,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     fontSize: 16,
     color: Colors.textPrimary,
-    fontFamily: 'Lobster',
+    fontFamily: "Brewheat.ttf",
     minHeight: 56,
   },
   inputWithIcon: {
@@ -104,4 +102,4 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 8,
   },
-}); 
+});

@@ -810,7 +810,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.textPrimary,
     marginBottom: 16,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
@@ -863,12 +863,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   statusDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   statsContainer: {
     flexDirection: "row",
@@ -893,13 +893,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.primary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   statLabel: {
     fontSize: 12,
     color: Colors.textSecondary,
     marginTop: 4,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   section: {
     padding: 16,
@@ -917,7 +917,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   actionButtons: {
     flexDirection: "row",
@@ -945,7 +945,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   cardChamado: {
     backgroundColor: Colors.surface,
@@ -966,7 +966,7 @@ const styles = StyleSheet.create({
   nomeChamado: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     fontWeight: "bold",
   },
   cardActions: {
@@ -987,19 +987,19 @@ const styles = StyleSheet.create({
   nomeAguardando: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     fontWeight: "bold",
   },
   whatsapp: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     marginBottom: 6,
   },
   barbeiro: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     marginBottom: 6,
   },
   removerBtn: {
@@ -1014,13 +1014,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   vazio: {
     fontSize: 16,
     color: Colors.textMuted,
     textAlign: "center",
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     fontStyle: "italic",
     padding: 20,
   },
@@ -1053,7 +1053,7 @@ const styles = StyleSheet.create({
   barbeiroOptionText: {
     color: Colors.textPrimary,
     fontSize: 14,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
   barbeiroOptionTextSelected: {
     color: "#fff",
@@ -1069,7 +1069,7 @@ const styles = StyleSheet.create({
   loginInfoText: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
     lineHeight: 20,
   },
   bold: {
@@ -1094,6 +1094,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "Brewheat.ttf",
+    fontFamily: "Montserrat",
   },
 });

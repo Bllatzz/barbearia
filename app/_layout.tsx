@@ -1,22 +1,26 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import {
+  DarkTheme,
+  DefaultTheme,
+  ThemeProvider,
+} from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import { useEffect } from "react";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-import { databaseService } from '../services/DatabaseService';
-import { filaService } from '../services/FilaService';
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { databaseService } from "../services/DatabaseService";
+import { filaService } from "../services/FilaService";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    Lobster: require('../assets/fonts/Lobster.ttf'),
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    Brewheat: require("../assets/fonts/Brewheat.ttf"),
     ...FontAwesome.font,
   });
 
@@ -26,7 +30,7 @@ export default function RootLayout() {
         await databaseService.initDatabase();
         await filaService.iniciarMonitoramento();
       } catch (error) {
-        console.error('Erro ao inicializar serviços:', error);
+        console.error("Erro ao inicializar serviços:", error);
       }
     }
 
@@ -38,7 +42,7 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <StatusBar style="light" backgroundColor="#000000" />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

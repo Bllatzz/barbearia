@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginTop: 32,
     marginBottom: 32,
-    fontFamily: "Lobster",
+    fontFamily: "Brewheat.ttf",
   },
   resumoBox: {
     backgroundColor: Colors.surface,

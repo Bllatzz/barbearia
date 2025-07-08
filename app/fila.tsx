@@ -1,5 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
+import { MaskedTextInput } from "react-native-mask-text";
 import {
   Alert,
   StyleSheet,
@@ -116,8 +117,9 @@ export default function FilaScreen() {
         <Body color={Colors.textSecondary} style={styles.label}>
           WhatsApp (opcional)
         </Body>
-        <TextInput
+        <MaskedTextInput
           style={styles.input}
+          mask="(99) 99999-9999"
           placeholder="(11) 99999-9999"
           placeholderTextColor={Colors.textMuted}
           value={whatsapp}
@@ -217,14 +219,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     marginBottom: 24,
-    fontFamily: "Lobster",
+    fontFamily: "Brewheat.ttf",
   },
   subtitle: {
     marginBottom: 16,
   },
   formBox: {
     width: "100%",
-    maxWidth: 340,
+    maxWidth: 380,
     backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 24,
@@ -340,8 +342,11 @@ const styles = StyleSheet.create({
     borderColor: Colors.surfaceHover,
     borderRadius: 12,
     paddingVertical: 12,
-    paddingHorizontal: 16,
-    width: "30%",
+    paddingHorizontal: 20, // aumente o padding
+    minWidth: 100, // largura mínima para caber "Qualquer"
+    alignItems: "center", // centraliza o conteúdo
+    justifyContent: "center",
+    marginHorizontal: 2, // espaço entre botões (opcional)
   },
   barbeiroOptionSelected: {
     backgroundColor: Colors.primary,

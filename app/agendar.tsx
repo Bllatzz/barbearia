@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginTop: 32,
     marginBottom: 8,
-    fontFamily: "Lobster",
+    fontFamily: "Brewheat.ttf",
   },
   subtitle: {
     marginBottom: 24,
