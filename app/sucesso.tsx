@@ -1,9 +1,9 @@
-import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Body, H1 } from '../components/ui/Typography';
-import { Colors } from '../constants/Colors';
+import { MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Body, H1 } from "../components/ui/Typography";
+import { Colors } from "../constants/Colors";
 
 export default function SucessoScreen() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export default function SucessoScreen() {
       <TouchableOpacity
         style={styles.button}
         activeOpacity={0.85}
-        onPress={() => router.replace('/')}
+        onPress={() => router.replace("/")}
       >
         <Text style={styles.buttonText}>Voltar ao início</Text>
       </TouchableOpacity>
@@ -33,19 +33,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 32,
   },
   iconBox: {
     marginBottom: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     fontSize: 32,
     marginBottom: 16,
-    fontFamily: 'Lobster',
+    fontFamily: "Lobster",
   },
   subtitle: {
     marginBottom: 40,
@@ -60,15 +60,15 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     letterSpacing: 1,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
-}); 
+});

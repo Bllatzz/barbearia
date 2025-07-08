@@ -1,14 +1,34 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Body, H1 } from '../components/ui/Typography';
-import { Colors } from '../constants/Colors';
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Body, H1 } from "../components/ui/Typography";
+import { Colors } from "../constants/Colors";
 
-const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const horarios = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30',
-  '16:00', '16:30', '17:00', '17:30', '18:00',
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
 ];
 
 function getDiasCalendario() {
@@ -41,7 +61,8 @@ export default function AgendarScreen() {
       <View style={styles.calendarioBox}>
         {dias.map((dia, idx) => {
           const isHoje = idx === 0;
-          const isSelected = diaSelecionado.toDateString() === dia.toDateString();
+          const isSelected =
+            diaSelecionado.toDateString() === dia.toDateString();
           return (
             <TouchableOpacity
               key={dia.toDateString()}
@@ -49,32 +70,71 @@ export default function AgendarScreen() {
               onPress={() => setDiaSelecionado(dia)}
               activeOpacity={0.8}
             >
-              <Text style={[styles.diaSemana, isSelected && styles.diaSemanaSelecionado]}>{diasSemana[dia.getDay()]}</Text>
-              <Text style={[styles.diaNumero, isSelected && styles.diaNumeroSelecionado]}>{dia.getDate()}</Text>
+              <Text
+                style={[
+                  styles.diaSemana,
+                  isSelected && styles.diaSemanaSelecionado,
+                ]}
+              >
+                {diasSemana[dia.getDay()]}
+              </Text>
+              <Text
+                style={[
+                  styles.diaNumero,
+                  isSelected && styles.diaNumeroSelecionado,
+                ]}
+              >
+                {dia.getDate()}
+              </Text>
               {isHoje && <Text style={styles.hoje}>Hoje</Text>}
             </TouchableOpacity>
           );
         })}
       </View>
       {/* Seleção de horários */}
-      <ScrollView contentContainerStyle={styles.horariosBox} horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.horariosBox}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
         {horarios.map((hora) => (
           <TouchableOpacity
             key={hora}
-            style={[styles.horario, horaSelecionada === hora && styles.horarioSelecionado]}
+            style={[
+              styles.horario,
+              horaSelecionada === hora && styles.horarioSelecionado,
+            ]}
             onPress={() => setHoraSelecionada(hora)}
             activeOpacity={0.85}
           >
-            <Text style={[styles.horarioText, horaSelecionada === hora && styles.horarioTextSelecionado]}>{hora}</Text>
+            <Text
+              style={[
+                styles.horarioText,
+                horaSelecionada === hora && styles.horarioTextSelecionado,
+              ]}
+            >
+              {hora}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
       {/* Botão avançar */}
       <TouchableOpacity
-        style={[styles.button, !(diaSelecionado && horaSelecionada) && styles.buttonDisabled]}
+        style={[
+          styles.button,
+          !(diaSelecionado && horaSelecionada) && styles.buttonDisabled,
+        ]}
         activeOpacity={0.85}
         disabled={!(diaSelecionado && horaSelecionada)}
-        onPress={() => router.push({ pathname: '/confirmar', params: { dia: diaSelecionado.toISOString(), hora: horaSelecionada! } })}
+        onPress={() =>
+          router.push({
+            pathname: "/confirmar",
+            params: {
+              dia: diaSelecionado.toISOString(),
+              hora: horaSelecionada!,
+            },
+          })
+        }
       >
         <Text style={styles.buttonText}>Avançar</Text>
       </TouchableOpacity>
@@ -87,28 +147,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
     padding: 24,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    alignItems: "center",
+    justifyContent: "flex-start",
   },
   title: {
     fontSize: 32,
     marginTop: 32,
     marginBottom: 8,
-    fontFamily: 'Lobster',
+    fontFamily: "Lobster",
   },
   subtitle: {
     marginBottom: 24,
   },
   calendarioBox: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginBottom: 32,
     gap: 8,
   },
   dia: {
     backgroundColor: Colors.surface,
     borderRadius: 16,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 14,
     shadowColor: Colors.shadowLight,
@@ -124,29 +184,29 @@ const styles = StyleSheet.create({
   diaSemana: {
     color: Colors.textSecondary,
     fontSize: 13,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   diaSemanaSelecionado: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   diaNumero: {
     color: Colors.textPrimary,
     fontSize: 20,
-    fontWeight: 'bold',
-    fontFamily: 'Montserrat',
+    fontWeight: "bold",
+    fontFamily: "Brewheat.ttf",
   },
   diaNumeroSelecionado: {
-    color: '#fff',
+    color: "#fff",
   },
   hoje: {
     fontSize: 10,
     color: Colors.primary,
     marginTop: 2,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   horariosBox: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginBottom: 32,
     paddingHorizontal: 4,
@@ -169,11 +229,11 @@ const styles = StyleSheet.create({
   horarioText: {
     color: Colors.textPrimary,
     fontSize: 16,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   horarioTextSelecionado: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
   },
   button: {
     backgroundColor: Colors.primary,
@@ -185,7 +245,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
     marginTop: 8,
   },
@@ -193,11 +253,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textMuted,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     letterSpacing: 1,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
-}); 
+});

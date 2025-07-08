@@ -1,42 +1,53 @@
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Body, H1 } from '../components/ui/Typography';
-import { Colors } from '../constants/Colors';
-import { filaService } from '../services/FilaService';
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Body, H1 } from "../components/ui/Typography";
+import { Colors } from "../constants/Colors";
+import { filaService } from "../services/FilaService";
 
-type Barbeiro = 'diego' | 'guilherme' | 'qualquer';
+type Barbeiro = "diego" | "guilherme" | "qualquer";
 
 export default function FilaScreen() {
   const router = useRouter();
-  const [nome, setNome] = useState('');
-  const [whatsapp, setWhatsapp] = useState('');
-  const [barbeiro, setBarbeiro] = useState<Barbeiro>('qualquer');
+  const [nome, setNome] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [barbeiro, setBarbeiro] = useState<Barbeiro>("qualquer");
   const [posicao, setPosicao] = useState<number | null>(null);
   const [sucesso, setSucesso] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function handleConfirmar() {
     if (!nome.trim()) {
-      Alert.alert('Preencha seu nome completo');
+      Alert.alert("Preencha seu nome completo");
       return;
     }
     setLoading(true);
     try {
-      const { posicao } = await filaService.adicionarCliente(nome.trim(), whatsapp.trim() || undefined, barbeiro);
+      const { posicao } = await filaService.adicionarCliente(
+        nome.trim(),
+        whatsapp.trim() || undefined,
+        barbeiro
+      );
       setPosicao(posicao);
       setSucesso(true);
     } catch (e) {
-      Alert.alert('Erro', 'Não foi possível entrar na fila. Tente novamente.');
+      Alert.alert("Erro", "Não foi possível entrar na fila. Tente novamente.");
     } finally {
       setLoading(false);
     }
   }
 
   function handleNovaEntrada() {
-    setNome('');
-    setWhatsapp('');
-    setBarbeiro('qualquer');
+    setNome("");
+    setWhatsapp("");
+    setBarbeiro("qualquer");
     setPosicao(null);
     setSucesso(false);
   }
@@ -47,19 +58,38 @@ export default function FilaScreen() {
         <H1 color={Colors.primary} align="center" style={styles.title}>
           Sucesso!
         </H1>
-        <Body color={Colors.textSecondary} align="center" style={styles.subtitle}>
+        <Body
+          color={Colors.textSecondary}
+          align="center"
+          style={styles.subtitle}
+        >
           Você entrou na fila.
         </Body>
-        <Text style={styles.posicao}>Sua posição: <Text style={styles.posicaoNum}>{posicao}º</Text></Text>
+        <Text style={styles.posicao}>
+          Sua posição: <Text style={styles.posicaoNum}>{posicao}º</Text>
+        </Text>
         <Text style={styles.barbeiroInfo}>
-          Barbeiro: <Text style={styles.barbeiroNome}>
-            {barbeiro === 'diego' ? 'Diego' : barbeiro === 'guilherme' ? 'Guilherme' : 'Qualquer um'}
+          Barbeiro:{" "}
+          <Text style={styles.barbeiroNome}>
+            {barbeiro === "diego"
+              ? "Diego"
+              : barbeiro === "guilherme"
+              ? "Guilherme"
+              : "Qualquer um"}
           </Text>
         </Text>
-        <TouchableOpacity style={styles.button} onPress={handleNovaEntrada} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleNovaEntrada}
+          activeOpacity={0.85}
+        >
           <Text style={styles.buttonText}>Nova entrada</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => router.replace('/')} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.buttonOutline}
+          onPress={() => router.replace("/")}
+          activeOpacity={0.85}
+        >
           <Text style={styles.buttonOutlineText}>Voltar ao início</Text>
         </TouchableOpacity>
       </View>
@@ -72,7 +102,9 @@ export default function FilaScreen() {
         Entrar na Fila
       </H1>
       <View style={styles.formBox}>
-        <Body color={Colors.textSecondary} style={styles.label}>Nome completo *</Body>
+        <Body color={Colors.textSecondary} style={styles.label}>
+          Nome completo *
+        </Body>
         <TextInput
           style={styles.input}
           placeholder="Digite seu nome completo"
@@ -80,8 +112,10 @@ export default function FilaScreen() {
           value={nome}
           onChangeText={setNome}
         />
-        
-        <Body color={Colors.textSecondary} style={styles.label}>WhatsApp (opcional)</Body>
+
+        <Body color={Colors.textSecondary} style={styles.label}>
+          WhatsApp (opcional)
+        </Body>
         <TextInput
           style={styles.input}
           placeholder="(11) 99999-9999"
@@ -90,58 +124,81 @@ export default function FilaScreen() {
           onChangeText={setWhatsapp}
           keyboardType="phone-pad"
         />
-        
-        <Body color={Colors.textSecondary} style={styles.label}>Escolher barbeiro</Body>
+
+        <Body color={Colors.textSecondary} style={styles.label}>
+          Escolher barbeiro
+        </Body>
         <View style={styles.barbeiroSelector}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.barbeiroOption, 
-              barbeiro === 'diego' && styles.barbeiroOptionSelected
-            ]} 
-            onPress={() => setBarbeiro('diego')}
+              styles.barbeiroOption,
+              barbeiro === "diego" && styles.barbeiroOptionSelected,
+            ]}
+            onPress={() => setBarbeiro("diego")}
           >
-            <Text style={[
-              styles.barbeiroOptionText,
-              barbeiro === 'diego' && styles.barbeiroOptionTextSelected
-            ]}>Diego</Text>
+            <Text
+              style={[
+                styles.barbeiroOptionText,
+                barbeiro === "diego" && styles.barbeiroOptionTextSelected,
+              ]}
+            >
+              Diego
+            </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              styles.barbeiroOption, 
-              barbeiro === 'guilherme' && styles.barbeiroOptionSelected
-            ]} 
-            onPress={() => setBarbeiro('guilherme')}
+              styles.barbeiroOption,
+              barbeiro === "guilherme" && styles.barbeiroOptionSelected,
+            ]}
+            onPress={() => setBarbeiro("guilherme")}
           >
-            <Text style={[
-              styles.barbeiroOptionText,
-              barbeiro === 'guilherme' && styles.barbeiroOptionTextSelected
-            ]}>Guilherme</Text>
+            <Text
+              style={[
+                styles.barbeiroOptionText,
+                barbeiro === "guilherme" && styles.barbeiroOptionTextSelected,
+              ]}
+            >
+              Guilherme
+            </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              styles.barbeiroOption, 
-              barbeiro === 'qualquer' && styles.barbeiroOptionSelected
-            ]} 
-            onPress={() => setBarbeiro('qualquer')}
+              styles.barbeiroOption,
+              barbeiro === "qualquer" && styles.barbeiroOptionSelected,
+            ]}
+            onPress={() => setBarbeiro("qualquer")}
           >
-            <Text style={[
-              styles.barbeiroOptionText,
-              barbeiro === 'qualquer' && styles.barbeiroOptionTextSelected
-            ]}>Qualquer</Text>
+            <Text
+              style={[
+                styles.barbeiroOptionText,
+                barbeiro === "qualquer" && styles.barbeiroOptionTextSelected,
+              ]}
+            >
+              Qualquer
+            </Text>
           </TouchableOpacity>
         </View>
-        
+
         <TouchableOpacity
-          style={[styles.button, (!nome.trim() || loading) && styles.buttonDisabled]}
+          style={[
+            styles.button,
+            (!nome.trim() || loading) && styles.buttonDisabled,
+          ]}
           activeOpacity={0.85}
           disabled={!nome.trim() || loading}
           onPress={handleConfirmar}
         >
-          <Text style={styles.buttonText}>{loading ? 'Enviando...' : 'Confirmar'}</Text>
+          <Text style={styles.buttonText}>
+            {loading ? "Enviando..." : "Confirmar"}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => router.replace('/')} activeOpacity={0.85}>
+        <TouchableOpacity
+          style={styles.buttonOutline}
+          onPress={() => router.replace("/")}
+          activeOpacity={0.85}
+        >
           <Text style={styles.buttonOutlineText}>Cancelar</Text>
         </TouchableOpacity>
       </View>
@@ -153,20 +210,20 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     padding: 32,
   },
   title: {
     fontSize: 32,
     marginBottom: 24,
-    fontFamily: 'Lobster',
+    fontFamily: "Lobster",
   },
   subtitle: {
     marginBottom: 16,
   },
   formBox: {
-    width: '100%',
+    width: "100%",
     maxWidth: 340,
     backgroundColor: Colors.surface,
     borderRadius: 16,
@@ -180,7 +237,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
     marginBottom: 2,
     marginTop: 12,
   },
@@ -193,7 +250,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     fontSize: 16,
     color: Colors.textPrimary,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -211,7 +268,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 12,
     elevation: 6,
-    width: '100%',
+    width: "100%",
     marginTop: 20,
     marginBottom: 8,
   },
@@ -219,12 +276,12 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.textMuted,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     letterSpacing: 1,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   buttonOutline: {
     borderWidth: 2,
@@ -232,49 +289,49 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingVertical: 18,
     paddingHorizontal: 48,
-    width: '100%',
+    width: "100%",
     backgroundColor: Colors.background,
     marginBottom: 4,
   },
   buttonOutlineText: {
     color: Colors.primary,
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     letterSpacing: 1,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   posicao: {
     fontSize: 20,
     color: Colors.textSecondary,
     marginBottom: 16,
     marginTop: 16,
-    textAlign: 'center',
-    fontFamily: 'Montserrat',
+    textAlign: "center",
+    fontFamily: "Brewheat.ttf",
   },
   posicaoNum: {
     color: Colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 28,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   barbeiroInfo: {
     fontSize: 18,
     color: Colors.textSecondary,
     marginBottom: 16,
     marginTop: 16,
-    textAlign: 'center',
-    fontFamily: 'Montserrat',
+    textAlign: "center",
+    fontFamily: "Brewheat.ttf",
   },
   barbeiroNome: {
     color: Colors.primary,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     fontSize: 20,
-    fontFamily: 'Montserrat',
+    fontFamily: "Brewheat.ttf",
   },
   barbeiroSelector: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   barbeiroOption: {
@@ -284,7 +341,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    width: '30%',
+    width: "30%",
   },
   barbeiroOptionSelected: {
     backgroundColor: Colors.primary,
@@ -292,11 +349,11 @@ const styles = StyleSheet.create({
   barbeiroOptionText: {
     color: Colors.textSecondary,
     fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    fontFamily: 'Montserrat',
+    fontWeight: "bold",
+    textAlign: "center",
+    fontFamily: "Brewheat.ttf",
   },
   barbeiroOptionTextSelected: {
-    color: '#fff',
+    color: "#fff",
   },
-}); 
+});

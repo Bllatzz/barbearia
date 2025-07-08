@@ -97,6 +97,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     letterSpacing: 1,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
 });
