@@ -32,6 +32,9 @@ export const Colors = {
   // Sombras
   shadowLight: 'rgba(128, 0, 32, 0.08)',
   shadowDark: 'rgba(0, 0, 0, 0.10)',
+
+  // Fundo Branco
+  white: '#FFFFFF',
 };
 
 const tintColorLight = Colors.primary;

@@ -351,6 +351,7 @@ export default function PainelScreen() {
           justifyContent: "center",
           alignItems: "center",
           padding: 24,
+          backgroundColor: Colors.white,
         }}
       >
         <H1>Trocar Senha</H1>

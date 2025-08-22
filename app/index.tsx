@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Image,
   StatusBar,
@@ -8,16 +8,22 @@ import {
   View,
   Animated,
   Pressable,
+  Alert,
 } from "react-native";
 import { H1 } from "../components/ui/Typography";
 import { Colors } from "../constants/Colors";
 import { router } from "expo-router";
+import { Cliente } from "@/types";
+import { databaseService } from "@/services/DatabaseService";
 
 export default function HomeScreen() {
   // Animações
   const logoAnim = useRef(new Animated.Value(0)).current;
   const titleAnim = useRef(new Animated.Value(0)).current;
   const btnAnim = useRef(new Animated.Value(0)).current;
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+
+
 
   useEffect(() => {
     Animated.stagger(200, [
@@ -39,7 +45,27 @@ export default function HomeScreen() {
         useNativeDriver: true,
       }),
     ]).start();
+    const carregarClientes = async () => {
+      try {
+        const clientes = await databaseService.getClientes();
+        setClientes(clientes);
+      } catch (error) {
+        console.error("Erro ao carregar clientes:", error);
+      }
+    };
+    carregarClientes();
   }, []);
+
+
+  
+  const getClientesBarbeiro = () => {
+    return clientes;
+  };
+
+  const getClientesAguardandoBarbeiro = () => {
+    return getClientesBarbeiro().filter((c) => c.status === "aguardando");
+  };
+  const clientesAguardando = getClientesAguardandoBarbeiro();
 
   return (
     <View style={styles.container}>
@@ -108,6 +134,14 @@ export default function HomeScreen() {
           alignItems: "center",
         }}
       >
+        {/**(Aparecer a quantidade de clientes na fila) */}
+        <Pressable style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]} android_ripple={{ color: "#fff2" }}>
+          <Text style={styles.buttonText}>{clientesAguardando.length} clientes na fila</Text>
+        </Pressable>
+
         <Pressable
           style={({ pressed }) => [
             styles.button,
@@ -128,6 +162,8 @@ export default function HomeScreen() {
         >
           <Text style={styles.buttonText}>Acessar Painel</Text>
         </Pressable>
+
+
       </Animated.View>
     </View>
   );

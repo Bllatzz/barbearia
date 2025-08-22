@@ -4,12 +4,16 @@ import { databaseService } from './DatabaseService';
 
 class FilaService {
   private monitoramentoAtivo = false;
-  private intervalId: NodeJS.Timeout | null = null;
+  private intervalId: ReturnType<typeof setInterval> | null = null;
 
-  async adicionarCliente(nome: string, telefone?: string, barbeiro: 'diego' | 'guilherme' | 'qualquer' = 'qualquer'): Promise<string> {
+  async adicionarCliente(
+    nome: string,
+    telefone?: string,
+    barbeiro: 'diego' | 'guilherme' | 'qualquer' = 'qualquer'
+  ): Promise<{ id: string; posicao: number }> {
     const clientesAguardando = await databaseService.getClientesAguardando();
     const posicao = clientesAguardando.length + 1;
-
+  
     const clienteId = await databaseService.inserirCliente({
       nome,
       telefone,
@@ -17,14 +21,13 @@ class FilaService {
       posicao,
       status: 'aguardando',
       notificado: false,
-      barbeiro
+      barbeiro,
     });
-
-    // Verificar se deve chamar próximo cliente
+  
     await this.verificarEChamarProximo();
-
-    return clienteId;
-  }
+  
+    return { id: clienteId, posicao };
+  }  
 
   async getFilaAtual(): Promise<Cliente[]> {
     return await databaseService.getClientes();
