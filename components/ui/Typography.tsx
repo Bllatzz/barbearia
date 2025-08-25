@@ -36,7 +36,7 @@ export const Typography: React.FC<TypographyProps> = ({
 
 const styles = StyleSheet.create({
   base: {
-    fontFamily: "Brewheat", // Fonte padrão
+    fontFamily: "Brewheat.ttf", // Fonte padrão
     letterSpacing: 0.5,
   },
 

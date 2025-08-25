@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   Alert,
   ScrollView,
@@ -7,12 +7,15 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Animated,
+  Image,
 } from "react-native";
 import { Body, H1 } from "../components/ui/Typography";
 import { Colors } from "../constants/Colors";
 import { databaseService } from "../services/DatabaseService";
 import { filaService } from "../services/FilaService";
 import { Cliente } from "../types";
+import { TextInputMask } from "react-native-masked-text";
 
 type Barbeiro = "diego" | "guilherme" | "qualquer";
 
@@ -34,6 +37,17 @@ export default function PainelScreen() {
   const [precisaTrocarSenha, setPrecisaTrocarSenha] = useState(false);
   const [novaSenha, setNovaSenha] = useState("");
   const [confirmarNovaSenha, setConfirmarNovaSenha] = useState("");
+
+  // Animação da logo
+  const logoOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(logoOpacity, {
+      toValue: 1,
+      duration: 1200,
+      useNativeDriver: true,
+    }).start();
+  }, []);
 
   // Atualização em tempo real da fila
   useEffect(() => {
@@ -190,7 +204,9 @@ export default function PainelScreen() {
         text: "Atendido",
         onPress: async () => {
           try {
+            console.log("Removendo como atendido:", cliente.id);
             await filaService.removerCliente(cliente.id, "atendido");
+            setTimeout(carregarClientes, 300); // Aguarda e recarrega a lista
           } catch (e) {
             console.error("Erro ao remover cliente como atendido:", e);
             Alert.alert("Erro", "Não foi possível remover o cliente");
@@ -201,7 +217,9 @@ export default function PainelScreen() {
         text: "Ausente",
         onPress: async () => {
           try {
+            console.log("Removendo como ausente:", cliente.id);
             await filaService.removerCliente(cliente.id, "ausente");
+            setTimeout(carregarClientes, 300); // Aguarda e recarrega a lista
           } catch (e) {
             console.error("Erro ao remover cliente como ausente:", e);
             Alert.alert("Erro", "Não foi possível remover o cliente");
@@ -351,9 +369,18 @@ export default function PainelScreen() {
           justifyContent: "center",
           alignItems: "center",
           padding: 24,
-          backgroundColor: Colors.white,
         }}
       >
+        {/* Logo animada */}
+        <View style={styles.logoContainer}>
+          <Animated.View style={[styles.logoCircle, { opacity: logoOpacity }]}>
+            <Image
+              source={require("../assets/images/logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </Animated.View>
+        </View>
         <H1>Trocar Senha</H1>
         <Text style={{ marginTop: 16 }}>
           Por segurança, altere sua senha padrão:
@@ -407,53 +434,62 @@ export default function PainelScreen() {
 
   if (!isAdmin) {
     return (
-      <View style={styles.container}>
-        <H1 color={Colors.primary} align="center" style={styles.title}>
-          Login - Painel do Barbeiro
-        </H1>
-        <Body
-          color={Colors.textSecondary}
-          align="center"
-          style={styles.subtitle}
-        >
-          Acesso restrito. Digite seu usuário e senha:
-        </Body>
+      <View
+        style={[
+          styles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        {/* Logo animada */}
+        <View style={styles.logoContainer}>
+          <Animated.View style={[styles.logoCircle, { opacity: logoOpacity }]}>
+            <Image
+              source={require("../assets/images/logo.png")}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+          </Animated.View>
+        </View>
+        <View style={styles.loginBox}>
+          <H1 color={Colors.primary} align="center" style={styles.title}>
+            Login - Painel do Barbeiro
+          </H1>
+          <Body
+            color={Colors.textSecondary}
+            align="center"
+            style={styles.subtitle}
+          >
+            Acesso restrito. Digite seu usuário e senha:
+          </Body>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Usuário"
-          placeholderTextColor={Colors.textMuted}
-          value={usuario}
-          onChangeText={setUsuario}
-          autoCapitalize="none"
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Usuário"
+            placeholderTextColor={Colors.textMuted}
+            value={usuario}
+            onChangeText={setUsuario}
+            autoCapitalize="none"
+          />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          placeholderTextColor={Colors.textMuted}
-          value={senha}
-          onChangeText={setSenha}
-          secureTextEntry
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            placeholderTextColor={Colors.textMuted}
+            value={senha}
+            onChangeText={setSenha}
+            secureTextEntry
+          />
 
-        <TouchableOpacity
-          style={[styles.button, loading && styles.buttonDisabled]}
-          onPress={handleLogin}
-          disabled={loading}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Entrando..." : "Entrar"}
-          </Text>
-        </TouchableOpacity>
-
-        <View style={styles.loginInfo}>
-          <Text style={styles.loginInfoText}>
-            <Text style={styles.bold}>Usuários padrão:</Text>
-            {"\n"}• Diego: diego / diego123{"\n"}• Guilherme: guilherme /
-            guilherme123{"\n"}• Admin: admin / admin123
-          </Text>
+          <TouchableOpacity
+            style={[styles.button, loading && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={loading}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     );
@@ -669,7 +705,20 @@ export default function PainelScreen() {
                   </Text>
                   <TouchableOpacity
                     style={styles.removerBtn}
-                    onPress={() => handleRemover(cliente)}
+                    onPress={async () => {
+                      setLoading(true);
+                      try {
+                        await filaService.removerCliente(cliente.id, "ausente");
+                        setTimeout(carregarClientes, 300);
+                      } catch (e) {
+                        Alert.alert(
+                          "Erro",
+                          "Não foi possível remover o cliente"
+                        );
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
                   >
                     <Text style={styles.removerBtnText}>Remover</Text>
                   </TouchableOpacity>
@@ -698,14 +747,29 @@ export default function PainelScreen() {
             ADICIONAR CLIENTE
           </Body>
           <View style={styles.formContainer}>
-            <TextInput
+            {/* Campo de nome com máscara para letras e espaços */}
+            <TextInputMask
+              type={"custom"}
+              options={{
+                mask: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              }}
               style={styles.input}
               placeholder="Nome completo"
               placeholderTextColor={Colors.textMuted}
               value={nomeManual}
               onChangeText={setNomeManual}
+              customTextInputProps={{
+                autoCapitalize: "words",
+              }}
             />
-            <TextInput
+            {/* Campo de WhatsApp com máscara */}
+            <TextInputMask
+              type={"cel-phone"}
+              options={{
+                maskType: "BRL",
+                withDDD: true,
+                dddMask: "(99) ",
+              }}
               style={styles.input}
               placeholder="WhatsApp (opcional)"
               placeholderTextColor={Colors.textMuted}
@@ -807,33 +871,41 @@ const styles = StyleSheet.create({
   input: {
     backgroundColor: Colors.surface,
     borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
+    padding: 20, // maior altura
+    fontSize: 20, // fonte maior
     color: Colors.textPrimary,
-    marginBottom: 16,
-    fontFamily: "Montserrat",
+    marginBottom: 24,
+    fontFamily: "Brewheat.ttf",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 2,
+    width: 400, // largura fixa maior
+    maxWidth: "90%", // responsivo
+    alignSelf: "center",
   },
   button: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    paddingVertical: 18, // mais alto
+    paddingHorizontal: 40, // mais largo
     alignItems: "center",
     shadowColor: Colors.shadowLight,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
+    marginTop: 12,
+    width: 200, // largura maior
+    maxWidth: "90%",
+    alignSelf: "center",
   },
   buttonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-    fontFamily: "Brewheat",
+    fontFamily: "Brewheat.ttf",
   },
   buttonDisabled: {
     backgroundColor: Colors.surfaceHover,
@@ -864,12 +936,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   statusDescription: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   statsContainer: {
     flexDirection: "row",
@@ -894,13 +966,13 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: Colors.primary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   statLabel: {
     fontSize: 12,
     color: Colors.textSecondary,
     marginTop: 4,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   section: {
     padding: 16,
@@ -918,7 +990,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     color: Colors.textPrimary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   actionButtons: {
     flexDirection: "row",
@@ -946,7 +1018,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   cardChamado: {
     backgroundColor: Colors.surface,
@@ -967,7 +1039,7 @@ const styles = StyleSheet.create({
   nomeChamado: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     fontWeight: "bold",
   },
   cardActions: {
@@ -988,19 +1060,19 @@ const styles = StyleSheet.create({
   nomeAguardando: {
     fontSize: 18,
     color: Colors.textPrimary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     fontWeight: "bold",
   },
   whatsapp: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     marginBottom: 6,
   },
   barbeiro: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     marginBottom: 6,
   },
   removerBtn: {
@@ -1015,13 +1087,13 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   vazio: {
     fontSize: 16,
     color: Colors.textMuted,
     textAlign: "center",
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     fontStyle: "italic",
     padding: 20,
   },
@@ -1054,7 +1126,7 @@ const styles = StyleSheet.create({
   barbeiroOptionText: {
     color: Colors.textPrimary,
     fontSize: 14,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
   },
   barbeiroOptionTextSelected: {
     color: "#fff",
@@ -1070,7 +1142,7 @@ const styles = StyleSheet.create({
   loginInfoText: {
     fontSize: 14,
     color: Colors.textSecondary,
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
     lineHeight: 20,
   },
   bold: {
@@ -1095,6 +1167,45 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     fontWeight: "bold",
-    fontFamily: "Montserrat",
+    fontFamily: "Brewheat.ttf",
+  },
+  loginBox: {
+    width: "90%", // ocupa quase toda a largura em telas pequenas
+    maxWidth: 500, // limite para desktop/PC
+    backgroundColor: Colors.background,
+    borderRadius: 34,
+    padding: 40, // padding confortável para tablet e PC
+    marginTop: 2,
+    alignItems: "center",
+    shadowColor: Colors.shadowLight,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 34,
+    elevation: 4,
+  },
+  logoContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+    marginBottom: 20,
+    overflow: "visible",
+  },
+  logoCircle: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#d32f2f",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.18,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  logoImage: {
+    width: 140,
+    height: 140,
   },
 });

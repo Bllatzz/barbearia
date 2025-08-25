@@ -21,9 +21,8 @@ export default function HomeScreen() {
   const logoAnim = useRef(new Animated.Value(0)).current;
   const titleAnim = useRef(new Animated.Value(0)).current;
   const btnAnim = useRef(new Animated.Value(0)).current;
+  const filaBtnAnim = useRef(new Animated.Value(0)).current;
   const [clientes, setClientes] = useState<Cliente[]>([]);
-
-
 
   useEffect(() => {
     Animated.stagger(200, [
@@ -44,6 +43,12 @@ export default function HomeScreen() {
         duration: 600,
         useNativeDriver: true,
       }),
+      Animated.spring(filaBtnAnim, {
+        toValue: 1,
+        friction: 7,
+        tension: 60,
+        useNativeDriver: true,
+      }),
     ]).start();
     const carregarClientes = async () => {
       try {
@@ -56,8 +61,6 @@ export default function HomeScreen() {
     carregarClientes();
   }, []);
 
-
-  
   const getClientesBarbeiro = () => {
     return clientes;
   };
@@ -70,6 +73,43 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.background} />
+
+      {/* Botão fixo e animado no topo direito */}
+      <Animated.View
+        style={[
+          styles.filaButtonContainer,
+          {
+            opacity: filaBtnAnim,
+            transform: [
+              {
+                translateY: filaBtnAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-30, 0],
+                }),
+              },
+              {
+                scale: filaBtnAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.95, 1],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        <Pressable
+          style={({ pressed }) => [
+            styles.filaButton,
+            pressed && styles.filaButtonPressed,
+          ]}
+          android_ripple={{ color: "#fff2" }}
+        >
+          <Text style={styles.filaButtonText}>
+            {clientesAguardando.length} clientes na fila
+          </Text>
+        </Pressable>
+      </Animated.View>
+
       <Animated.View
         style={{
           ...styles.logoBox,
@@ -134,13 +174,7 @@ export default function HomeScreen() {
           alignItems: "center",
         }}
       >
-        {/**(Aparecer a quantidade de clientes na fila) */}
-        <Pressable style={({ pressed }) => [
-            styles.button,
-            pressed && styles.buttonPressed,
-          ]} android_ripple={{ color: "#fff2" }}>
-          <Text style={styles.buttonText}>{clientesAguardando.length} clientes na fila</Text>
-        </Pressable>
+        {/* Removido o botão antigo de clientes na fila */}
 
         <Pressable
           style={({ pressed }) => [
@@ -162,8 +196,6 @@ export default function HomeScreen() {
         >
           <Text style={styles.buttonText}>Acessar Painel</Text>
         </Pressable>
-
-
       </Animated.View>
     </View>
   );
@@ -208,10 +240,9 @@ const styles = StyleSheet.create({
     textShadowRadius: 4,
     elevation: 12,
     paddingHorizontal: 10,
-    backgroundColor: "trasnsparent", // ou remova esta linha
+    backgroundColor: "trasnsparent",
     borderRadius: 18,
     overflow: "hidden",
-    // Efeito de brilho sutil
     borderWidth: 2,
     borderColor: "#fff4",
   },
@@ -245,6 +276,46 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     fontFamily: "Brewheat.ttf",
     textShadowColor: "#00000044",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  // NOVOS ESTILOS PARA O BOTÃO FIXO
+  filaButtonContainer: {
+    position: "absolute",
+    top: 36,
+    right: 24,
+    zIndex: 99,
+    elevation: 20,
+    shadowColor: "#7a001a",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+  },
+  filaButton: {
+    backgroundColor: "#7a001a",
+    borderRadius: 22,
+    paddingVertical: 16,
+    paddingHorizontal: 36,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 200,
+    shadowColor: "#7a001a",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 12,
+  },
+  filaButtonPressed: {
+    backgroundColor: "#a3002a",
+    transform: [{ scale: 0.98 }],
+  },
+  filaButtonText: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    letterSpacing: 1.5,
+    textAlign: "center",
+    textShadowColor: "#00000033",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
   },
