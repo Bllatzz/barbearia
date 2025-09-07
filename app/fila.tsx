@@ -31,7 +31,10 @@ export default function FilaScreen() {
     }
     setLoading(true);
     try {
-      const { posicao } = await filaService.adicionarCliente(nome.trim(),whatsapp.trim() || undefined,barbeiro
+      const { posicao } = await filaService.adicionarCliente(
+        nome.trim(),
+        whatsapp.trim() || undefined,
+        barbeiro
       );
       setPosicao(posicao);
       setSucesso(true);

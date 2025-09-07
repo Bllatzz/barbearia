@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "reset-project": "node ./scripts/reset-project.js",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -21,7 +20,6 @@
     "@types/bcryptjs": "^2.4.6",
     "bcryptjs": "^3.0.2",
     "expo": "~53.0.17",
-    "expo-av": "^15.1.7",
     "expo-blur": "~14.1.5",
     "expo-constants": "~17.1.7",
     "expo-device": "^7.1.4",
@@ -30,7 +28,6 @@
     "expo-image": "~2.3.2",
     "expo-linear-gradient": "^14.1.5",
     "expo-linking": "~7.1.7",
-    "expo-notifications": "^0.31.4",
     "expo-router": "~5.1.3",
     "expo-splash-screen": "~0.30.10",
     "expo-status-bar": "~2.2.3",
@@ -47,9 +44,8 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-sound": "^0.11.2",
-    "react-native-web": "~0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-svg": "^15.12.1",
+    "react-native-web": "~0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

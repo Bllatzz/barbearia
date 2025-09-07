@@ -1,9 +1,13 @@
 import { Cliente } from '../types';
 import { databaseService } from './DatabaseService';
+import { MessageService } from './MessageService';
 
 class WhatsAppService {
   private apiKey: string = '';
   private apiUrl: string = '';
+  private useWebWhatsApp: boolean = true; // Ativado por padrão
+  private webServerUrl: string = 'http://localhost:8000'; // URL do servidor WhatsApp Web
+  private isAdminMode: boolean = true; // Modo admin ativo por padrão
 
   async init(): Promise<void> {
     const configs = await databaseService.getConfiguracoes();
@@ -14,12 +18,28 @@ class WhatsAppService {
   }
 
   async enviarMensagem(telefone: string, mensagem: string): Promise<boolean> {
-    if (!this.apiKey || !this.apiUrl) {
-      console.log('WhatsApp API não configurada');
-      return false;
-    }
-
     try {
+      // Só enviar se estiver no modo admin
+      if (!this.isAdminMode) {
+        console.log('WhatsApp desabilitado - modo admin não ativo');
+        return false;
+      }
+
+      // Priorizar WhatsApp Web se estiver ativo
+      if (this.useWebWhatsApp) {
+        const webSuccess = await this.enviarViaWebWhatsApp(telefone, mensagem);
+        if (webSuccess) {
+          return true;
+        }
+        console.log('WhatsApp Web falhou, tentando API externa...');
+      }
+
+      // Fallback para APIs externas
+      if (!this.apiKey || !this.apiUrl) {
+        console.log('WhatsApp API não configurada');
+        return false;
+      }
+
       // Exemplo para Twilio
       if (this.apiUrl.includes('twilio')) {
         return await this.enviarViaTwilio(telefone, mensagem);
@@ -45,6 +65,27 @@ class WhatsAppService {
 
     } catch (error) {
       console.error('Erro ao enviar mensagem WhatsApp:', error);
+      return false;
+    }
+  }
+
+  private async enviarViaWebWhatsApp(telefone: string, mensagem: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.webServerUrl}/notify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone: this.formatarTelefoneBrasil(telefone),
+          message: mensagem
+        })
+      });
+
+      const result = await response.json();
+      return result.success;
+    } catch (error) {
+      console.error('Erro ao enviar via WhatsApp Web:', error);
       return false;
     }
   }
@@ -131,10 +172,51 @@ class WhatsAppService {
   }
 
   // Métodos específicos para o sistema da barbearia
+  async enviarConfirmacaoEntrada(cliente: Cliente): Promise<boolean> {
+    if (!cliente.telefone) return false;
+
+    const mensagem = MessageService.getMensagemEntrada(cliente.nome, cliente.posicao);
+    
+    const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
+    
+    if (sucesso) {
+      await databaseService.inserirNotificacao({
+        clienteId: cliente.id,
+        tipo: 'confirmacao',
+        mensagem,
+        enviada: true,
+        horarioEnvio: new Date().toISOString()
+      });
+    }
+
+    return sucesso;
+  }
+
   async enviarAlertaTerceiro(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = `Olá ${cliente.nome}, você é o ${cliente.posicao}º da fila na Bernades Barbearia. Fique atento, sua vez está chegando!`;
+    const mensagem = MessageService.getMensagemTerceiro(cliente.nome);
+    
+    const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
+    
+    if (sucesso) {
+      await databaseService.marcarComoNotificado(cliente.id);
+      await databaseService.inserirNotificacao({
+        clienteId: cliente.id,
+        tipo: 'alerta',
+        mensagem,
+        enviada: true,
+        horarioEnvio: new Date().toISOString()
+      });
+    }
+
+    return sucesso;
+  }
+
+  async enviarAlertaSegundo(cliente: Cliente): Promise<boolean> {
+    if (!cliente.telefone) return false;
+
+    const mensagem = MessageService.getMensagemSegundo(cliente.nome);
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
@@ -155,7 +237,7 @@ class WhatsAppService {
   async enviarChamadaPrimeiro(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = `Sua vez chegou! Você tem até 5 minutos para se apresentar na Bernades Barbearia. Após isso, passaremos para o próximo cliente.`;
+    const mensagem = MessageService.getMensagemPrimeiro(cliente.nome);
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
@@ -173,24 +255,62 @@ class WhatsAppService {
     return sucesso;
   }
 
-  async enviarConfirmacao(cliente: Cliente): Promise<boolean> {
-    if (!cliente.telefone) return false;
-
-    const mensagem = `Olá ${cliente.nome}, você foi cadastrado na fila da Bernades Barbearia na posição ${cliente.posicao}. Aguarde ser chamado!`;
-    
-    const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
-    
-    if (sucesso) {
-      await databaseService.inserirNotificacao({
-        clienteId: cliente.id,
-        tipo: 'confirmacao',
-        mensagem,
-        enviada: true,
-        horarioEnvio: new Date().toISOString()
-      });
+  // Método para configurar o modo de envio
+  setWebWhatsAppMode(useWeb: boolean, serverUrl?: string): void {
+    this.useWebWhatsApp = useWeb;
+    if (serverUrl) {
+      this.webServerUrl = serverUrl;
     }
+  }
 
-    return sucesso;
+  // Método para ativar/desativar modo admin
+  setAdminMode(isAdmin: boolean): void {
+    this.isAdminMode = isAdmin;
+    console.log(`WhatsApp modo admin: ${isAdmin ? 'ATIVADO' : 'DESATIVADO'}`);
+  }
+
+  // Método para verificar se está no modo admin
+  isAdminModeActive(): boolean {
+    return this.isAdminMode;
+  }
+
+  // Método para verificar status do WhatsApp Web
+  async getWebWhatsAppStatus(): Promise<any> {
+    try {
+      const response = await fetch(`${this.webServerUrl}/whatsapp/status`);
+      return await response.json();
+    } catch (error) {
+      console.error('Erro ao verificar status do WhatsApp Web:', error);
+      return { connected: false, error: error.message };
+    }
+  }
+
+  // Método para formatar telefone brasileiro automaticamente
+  private formatarTelefoneBrasil(telefone: string): string {
+    // Remove todos os caracteres não numéricos
+    let numeros = telefone.replace(/\D/g, '');
+    
+    // Se já tem código do país (55), remove para processar
+    if (numeros.startsWith('55') && numeros.length >= 12) {
+      numeros = numeros.substring(2); // Remove o 55
+    }
+    
+    // Corrigir duplo 9 (celular com 2 noves) - ex: 31996702935 -> 3196702935
+    if (numeros.length === 11 && numeros.charAt(2) === '9' && numeros.charAt(3) === '9') {
+      // Remove o segundo 9 (posição 3)
+      numeros = numeros.substring(0, 3) + numeros.substring(4);
+    }
+    
+    // Adicionar +55 de volta
+    const telefoneFinal = `+55${numeros}`;
+    
+    // Validar se o número tem tamanho correto (10 ou 11 dígitos)
+    if (numeros.length >= 10 && numeros.length <= 11) {
+      return telefoneFinal;
+    }
+    
+    // Se o número é muito curto ou muito longo, retorna como estava
+    return telefone;
   }
 }
 

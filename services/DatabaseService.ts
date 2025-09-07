@@ -55,6 +55,9 @@ class DatabaseService {
   }
 
   async inserirCliente(cliente: Omit<Cliente, "id">): Promise<string> {
+    console.log('🔍 DEBUG - Inserindo cliente no banco:');
+    console.log('   Dados:', cliente);
+    
     const docRef = await addDoc(this.clientesCollection, {
       nome: cliente.nome,
       telefone: cliente.telefone || null,
@@ -67,6 +70,7 @@ class DatabaseService {
       updatedAt: serverTimestamp(),
     });
 
+    console.log('   Cliente inserido com ID:', docRef.id);
     return docRef.id;
   }
 
@@ -74,7 +78,7 @@ class DatabaseService {
     const q = query(this.clientesCollection, orderBy("posicao", "asc"));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map((doc) => ({
+    const clientes = querySnapshot.docs.map((doc) => ({
       id: doc.id,
       nome: doc.data().nome,
       telefone: doc.data().telefone,
@@ -86,26 +90,38 @@ class DatabaseService {
       notificado: doc.data().notificado || false,
       barbeiro: doc.data().barbeiro || "qualquer",
     }));
+    
+    console.log('🔍 DEBUG - getClientes retornou:', clientes.length, 'clientes');
+    console.log('   Clientes:', clientes);
+    
+    return clientes;
   }
 
   async getClientesAguardando(): Promise<Cliente[]> {
     const q = query(this.clientesCollection, orderBy("posicao", "asc"));
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs
-      .map((doc) => ({
-        id: doc.id,
-        nome: doc.data().nome,
-        telefone: doc.data().telefone,
-        horarioEntrada:
-          doc.data().horarioEntrada?.toDate?.()?.toISOString() ||
-          new Date().toISOString(),
-        posicao: doc.data().posicao,
-        status: doc.data().status,
-        notificado: doc.data().notificado || false,
-        barbeiro: doc.data().barbeiro || "qualquer",
-      }))
-      .filter((cliente) => cliente.status === "aguardando");
+    const todosClientes = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      nome: doc.data().nome,
+      telefone: doc.data().telefone,
+      horarioEntrada:
+        doc.data().horarioEntrada?.toDate?.()?.toISOString() ||
+        new Date().toISOString(),
+      posicao: doc.data().posicao,
+      status: doc.data().status,
+      notificado: doc.data().notificado || false,
+      barbeiro: doc.data().barbeiro || "qualquer",
+    }));
+    
+    const clientesAguardando = todosClientes.filter((cliente) => cliente.status === "aguardando");
+    
+    console.log('🔍 DEBUG - getClientesAguardando:');
+    console.log('   Total de clientes:', todosClientes.length);
+    console.log('   Aguardando:', clientesAguardando.length);
+    console.log('   Status dos clientes:', todosClientes.map(c => ({ nome: c.nome, status: c.status })));
+    
+    return clientesAguardando;
   }
 
   async getClientesChamados(): Promise<Cliente[]> {

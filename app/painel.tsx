@@ -16,6 +16,7 @@ import { databaseService } from "../services/DatabaseService";
 import { filaService } from "../services/FilaService";
 import { Cliente } from "../types";
 import { TextInputMask } from "react-native-masked-text";
+import { router } from "expo-router";
 
 type Barbeiro = "diego" | "guilherme" | "qualquer";
 
@@ -236,15 +237,23 @@ export default function PainelScreen() {
     }
     setLoading(true);
     try {
-      await filaService.adicionarClienteManual(
+      // Usar adicionarCliente em vez de adicionarClienteManual para enviar mensagem automaticamente
+      const { posicao } = await filaService.adicionarCliente(
         nomeManual.trim(),
         whatsappManual.trim() || undefined,
         barbeiroManual
       );
+      
+      Alert.alert(
+        "Sucesso!", 
+        `${nomeManual.trim()} foi adicionado na posição ${posicao} da fila${whatsappManual.trim() ? ' e receberá notificações via WhatsApp' : ''}.`
+      );
+      
       setNomeManual("");
       setWhatsappManual("");
       setBarbeiroManual("qualquer");
     } catch (e) {
+      console.error("Erro ao adicionar cliente manualmente:", e);
       Alert.alert("Erro", "Não foi possível adicionar o cliente");
     } finally {
       setLoading(false);
@@ -369,6 +378,7 @@ export default function PainelScreen() {
           justifyContent: "center",
           alignItems: "center",
           padding: 24,
+          backgroundColor: "#FFFFFF",
         }}
       >
         {/* Logo animada */}
@@ -638,6 +648,13 @@ export default function PainelScreen() {
             disabled={loading}
           >
             <Text style={styles.actionButtonText}>Corrigir Posições</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, { backgroundColor: "#25D366" }]}
+            onPress={() => router.push("/configurar-whatsapp")}
+          >
+            <Text style={styles.actionButtonText}>📱 Configurar WhatsApp</Text>
           </TouchableOpacity>
         </View>
 
