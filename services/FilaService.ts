@@ -1,8 +1,6 @@
 import { Cliente } from '../types';
 import { whatsAppService } from './WhatsAppService';
 import { databaseService } from './DatabaseService';
-import { backendIntegration } from './BackendIntegration';
-import { MessageService } from './MessageService';
 
 class FilaService {
   private monitoramentoAtivo = false;
@@ -13,16 +11,8 @@ class FilaService {
     telefone?: string,
     barbeiro: 'diego' | 'guilherme' | 'qualquer' = 'qualquer'
   ): Promise<{ id: string; posicao: number }> {
-    console.log('🔍 DEBUG - Adicionando cliente:');
-    console.log('   Nome:', nome);
-    console.log('   Telefone:', telefone);
-    console.log('   Barbeiro:', barbeiro);
-    
     const clientesAguardando = await databaseService.getClientesAguardando();
     const posicao = clientesAguardando.length + 1;
-    
-    console.log('   Posição calculada:', posicao);
-    console.log('   Clientes aguardando:', clientesAguardando.length);
   
     const clienteId = await databaseService.inserirCliente({
       nome,
@@ -33,32 +23,6 @@ class FilaService {
       notificado: false,
       barbeiro,
     });
-    
-    console.log('   Cliente inserido com ID:', clienteId);
-
-    // Enviar confirmação de entrada na fila (só se admin ativo)
-    console.log('🔍 DEBUG - Verificando envio de mensagem:');
-    console.log('   Telefone:', telefone);
-    console.log('   Admin ativo:', whatsAppService.isAdminModeActive());
-    
-    if (telefone && whatsAppService.isAdminModeActive()) {
-      try {
-        // Adicionar +55 automaticamente no backend
-        const telefoneCompleto = this.formatarTelefoneBrasil(telefone);
-        const mensagem = MessageService.getMensagemEntrada(nome, posicao);
-        
-        console.log('📱 Enviando mensagem:');
-        console.log('   Para:', telefoneCompleto);
-        console.log('   Mensagem:', mensagem);
-        
-        const sucesso = await backendIntegration.sendMessage(telefoneCompleto, mensagem);
-        console.log('   Sucesso:', sucesso);
-      } catch (error) {
-        console.error('❌ Erro ao enviar confirmação de entrada:', error);
-      }
-    } else {
-      console.log('❌ Não enviou mensagem - telefone ou admin não ativo');
-    }
   
     await this.verificarEChamarProximo();
   
@@ -71,11 +35,9 @@ class FilaService {
 
   async removerCliente(id: string, motivo: 'atendido' | 'ausente' = 'atendido'): Promise<void> {
     try {
-      console.log(`🗑️ Removendo cliente ${id} - Motivo: ${motivo}`);
       await databaseService.atualizarStatusCliente(id, motivo);
       await this.reorganizarFila();
       await this.verificarAlertas();
-      console.log(`✅ Cliente ${id} removido e fila reorganizada`);
     } catch (error) {
       console.error('Erro ao remover cliente:', error);
       throw error;
@@ -122,20 +84,12 @@ class FilaService {
     // Chamar o cliente
     await databaseService.atualizarStatusCliente(proximoCliente.id, 'chamado');
 
-    // Enviar notificação WhatsApp (só se admin ativo)
-    if (whatsAppService.isAdminModeActive() && proximoCliente.telefone) {
-      try {
-        const telefoneCompleto = this.formatarTelefoneBrasil(proximoCliente.telefone);
-        const mensagem = MessageService.getMensagemPrimeiro(proximoCliente.nome);
-        await backendIntegration.sendMessage(telefoneCompleto, mensagem);
-        console.log(`📱 Cliente ${proximoCliente.nome} foi chamado e notificado`);
-      } catch (error) {
-        console.error('Erro ao enviar notificação:', error);
-      }
+    // Enviar notificação WhatsApp (se configurado)
+    try {
+      await whatsAppService.enviarChamadaPrimeiro(proximoCliente);
+    } catch (error) {
+      console.error('Erro ao enviar notificação:', error);
     }
-
-    // Reorganizar fila após chamar cliente
-    await this.reorganizarFila();
 
     return proximoCliente;
   }
@@ -193,7 +147,6 @@ class FilaService {
         
         if (cliente.posicao !== novaPosicao) {
           await databaseService.atualizarPosicaoCliente(cliente.id, novaPosicao);
-          console.log(`📝 Posição atualizada: ${cliente.nome} - Posição ${novaPosicao}`);
         }
       }
     } catch (error) {
@@ -203,61 +156,31 @@ class FilaService {
   }
 
   async verificarAlertas(): Promise<void> {
-    // Só enviar alertas se admin estiver ativo
-    if (!whatsAppService.isAdminModeActive()) {
-      return;
-    }
-
     const clientesAguardando = await databaseService.getClientesAguardando();
     
-    console.log(`🔍 Verificando alertas para ${clientesAguardando.length} clientes aguardando`);
-    
-    // Enviar notificação para o 3º da fila (posição 3) - apenas uma vez
+    // Enviar notificação para o 3º da fila
     if (clientesAguardando.length >= 3) {
       const terceiro = clientesAguardando[2];
-      if (terceiro.posicao === 3 && terceiro.telefone && !terceiro.notificado) {
+      if (!terceiro.notificado) {
         try {
-          const telefoneCompleto = this.formatarTelefoneBrasil(terceiro.telefone);
-          const mensagem = MessageService.getMensagemTerceiro(terceiro.nome);
-          await backendIntegration.sendMessage(telefoneCompleto, mensagem);
-          await databaseService.marcarComoNotificado(terceiro.id);
-          console.log(`📱 Alerta 3º enviado para ${terceiro.nome}`);
+          await whatsAppService.enviarAlertaTerceiro(terceiro);
         } catch (error) {
           console.error('Erro ao enviar notificação para 3º:', error);
         }
       }
     }
 
-    // Enviar notificação para o 2º da fila (posição 2) - apenas uma vez
-    if (clientesAguardando.length >= 2) {
-      const segundo = clientesAguardando[1];
-      if (segundo.posicao === 2 && segundo.telefone && !segundo.notificado) {
+    // Enviar notificação para o 1º da fila
+    if (clientesAguardando.length >= 1) {
+      const primeiro = clientesAguardando[0];
+      if (!primeiro.notificado) {
         try {
-          const telefoneCompleto = this.formatarTelefoneBrasil(segundo.telefone);
-          const mensagem = MessageService.getMensagemSegundo(segundo.nome);
-          await backendIntegration.sendMessage(telefoneCompleto, mensagem);
-          await databaseService.marcarComoNotificado(segundo.id);
-          console.log(`📱 Alerta 2º enviado para ${segundo.nome}`);
+          await whatsAppService.enviarChamadaPrimeiro(primeiro);
         } catch (error) {
-          console.error('Erro ao enviar notificação para 2º:', error);
+          console.error('Erro ao enviar notificação para 1º:', error);
         }
+
       }
-    }
-  }
-
-  // Método para enviar notificação de mudança de posição
-  async enviarNotificacaoPosicao(cliente: Cliente, novaPosicao: number): Promise<void> {
-    if (!whatsAppService.isAdminModeActive() || !cliente.telefone) {
-      return;
-    }
-
-    try {
-      const telefoneCompleto = this.formatarTelefoneBrasil(cliente.telefone);
-      const mensagem = MessageService.getMensagemPorPosicao(cliente.nome, novaPosicao);
-      await backendIntegration.sendMessage(telefoneCompleto, mensagem);
-      console.log(`📱 Notificação de posição enviada para ${cliente.nome} - Posição ${novaPosicao}`);
-    } catch (error) {
-      console.error('Erro ao enviar notificação de posição:', error);
     }
   }
 
@@ -292,34 +215,6 @@ class FilaService {
   onFilaChange(callback: (clientes: Cliente[]) => void): () => void {
     return databaseService.onFilaChange(callback);
   }
-
-  // Método para formatar telefone brasileiro automaticamente
-  private formatarTelefoneBrasil(telefone: string): string {
-    // Remove todos os caracteres não numéricos
-    let numeros = telefone.replace(/\D/g, '');
-    
-    // Se já tem código do país (55), remove para processar
-    if (numeros.startsWith('55') && numeros.length >= 12) {
-      numeros = numeros.substring(2); // Remove o 55
-    }
-    
-    // Corrigir duplo 9 (celular com 2 noves) - ex: 31996702935 -> 3196702935
-    if (numeros.length === 11 && numeros.charAt(2) === '9' && numeros.charAt(3) === '9') {
-      // Remove o segundo 9 (posição 3)
-      numeros = numeros.substring(0, 3) + numeros.substring(4);
-    }
-    
-    // Adicionar +55 de volta
-    const telefoneFinal = `+55${numeros}`;
-    
-    // Validar se o número tem tamanho correto (10 ou 11 dígitos)
-    if (numeros.length >= 10 && numeros.length <= 11) {
-      return telefoneFinal;
-    }
-    
-    // Se o número é muito curto ou muito longo, retorna como estava
-    return telefone;
-  }
 }
 
-export const filaService = new FilaService(); 
+export const filaService = new FilaService(); export const filaService = new FilaService(); 

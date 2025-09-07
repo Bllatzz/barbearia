@@ -1,6 +1,5 @@
 import { Cliente } from '../types';
 import { databaseService } from './DatabaseService';
-import { MessageService } from './MessageService';
 
 class WhatsAppService {
   private apiKey: string = '';
@@ -175,7 +174,7 @@ class WhatsAppService {
   async enviarConfirmacaoEntrada(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = MessageService.getMensagemEntrada(cliente.nome, cliente.posicao);
+    const mensagem = `💈 Barbearia Bernardes💈 \nOlá ${cliente.nome}, você entrou na fila da Bernardes Barbearia. \nAtualmente você é o número ${cliente.posicao} da fila.`;
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
@@ -195,7 +194,7 @@ class WhatsAppService {
   async enviarAlertaTerceiro(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = MessageService.getMensagemTerceiro(cliente.nome);
+    const mensagem = `💈 Barbearia Bernardes💈 \nEstá quase na sua vez! Você é o terceiro na fila`;
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
@@ -216,7 +215,7 @@ class WhatsAppService {
   async enviarAlertaSegundo(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = MessageService.getMensagemSegundo(cliente.nome);
+    const mensagem = `Fique pronto, só falta 1 pessoa na sua frente.`;
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
@@ -237,7 +236,7 @@ class WhatsAppService {
   async enviarChamadaPrimeiro(cliente: Cliente): Promise<boolean> {
     if (!cliente.telefone) return false;
 
-    const mensagem = MessageService.getMensagemPrimeiro(cliente.nome);
+    const mensagem = `💈 Barbearia Bernardes💈 \nChegou sua vez, por gentileza, compareça ao estabelecimento.`;
     
     const sucesso = await this.enviarMensagem(cliente.telefone, mensagem);
     
